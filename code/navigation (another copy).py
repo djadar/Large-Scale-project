@@ -20,44 +20,51 @@ sc.setLogLevel("ERROR")
 
 
 # read the input file into an RDD[String]
-datapath = "../clusterdata-2011-2/machine_events/part-00000-of-00001.csv"
-wholeFile = sc.textFile(datapath)
+wholeFile = sc.textFile("./data/CLIWOC15.csv")
 
-# We set the comumn names in a an array
-firstLine = ["time",
-"machine ID",
-"event type",
-"platform ID",
-"CPUs",
-"Memory"
-]
+# The first line of the file defines the name of each column in the cvs file
+# We store it as an array in the driver program
+firstLine = wholeFile.filter(lambda x: "RecID" in x).collect()[0].replace('"','').split(',')
 
 # filter out the first line from the initial RDD
-#entries = wholeFile.filter(lambda x: not ("RecID" in x))
+entries = wholeFile.filter(lambda x: not ("RecID" in x))
 
 # split each line into an array of items
-entries = wholeFile.map(lambda x : x.split(','))
+entries = entries.map(lambda x : x.split(','))
 
 # keep the RDD in memory
 entries.cache()
 
-##### Create an RDD that contains all machine ID observed in the
+##### Create an RDD that contains all nationalities observed in the
 ##### different entries
 
-# Information about the machine ID is provided in the column named
-# "machine ID"
+# Information about the nationality is provided in the column named
+# "Nationality"
 
 # First find the index of the column corresponding to the "Nationality"
-column_index=findCol(firstLine, "machine ID")
-print("{} corresponds to column {}".format("machine ID", column_index))
+column_index=findCol(firstLine, "Nationality")
+print("{} corresponds to column {}".format("Nationality", column_index))
 
 # Use 'map' to create a RDD with all nationalities and 'distinct' to remove duplicates 
-machineIDs = entries.map(lambda x: x[column_index])
+nationalities = entries.map(lambda x: x[column_index])
 
+def clean(s):
+	#print(s)
+	return s.replace(" ","")
+	
 
-for elem in machineIDs.take(10):
+# 1- Clean the entries
+nationalities = nationalities.map(lambda x: clean(x)).distinct()
+
+'''
+for elem in nationalities.take(10):
 	print(elem)
 
+nationalities_item = nationalities.map((a) => a.replace(' ','') )
+for elem in nationalities_item:
+	elem.replace(' ','')
+	
+nationalities = nationalities_item
 '''
 
 
@@ -84,4 +91,3 @@ year_observation = years.groupByKey()
 
 # prevent the program from terminating immediatly
 input("Press Enter to continue...")
-'''
