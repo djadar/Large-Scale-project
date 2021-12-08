@@ -20,7 +20,8 @@ sc.setLogLevel("ERROR")
 
 
 # read the input file into an RDD[String]
-datapath = "../clusterdata-2011-2/machine_events/part-00000-of-00001.csv"
+datapath = "../clusterdata-2011-2/machine_events/data"
+#part-00000-of-00001.csv"
 wholeFile = sc.textFile(datapath)
 
 # We set the comumn names in a an array
@@ -31,7 +32,6 @@ firstLine = ["time",
 "CPUs",
 "Memory"
 ]
-
 # filter out the first line from the initial RDD
 #entries = wholeFile.filter(lambda x: not ("RecID" in x))
 
@@ -48,15 +48,32 @@ entries.cache()
 # "machine ID"
 
 # First find the index of the column corresponding to the "Nationality"
-column_index=findCol(firstLine, "machine ID")
-print("{} corresponds to column {}".format("machine ID", column_index))
+column_index1=findCol(firstLine, "machine ID")
+print("{} corresponds to column {}".format("machine ID", column_index1))
+
+column_index2=findCol(firstLine, "CPUs")
+print("{} corresponds to column {}".format("CPUs", column_index2))
 
 # Use 'map' to create a RDD with all nationalities and 'distinct' to remove duplicates 
-machineIDs = entries.map(lambda x: x[column_index])
+machineIDs = entries.map(lambda x: x[column_index1])
+print("Le nombre de machines est {}".format(machineIDs.count()))
+
+CPUs = entries.map(lambda x: x[column_index2])
+
+print("Le nombre de CPUs est {}".format(CPUs.count()))
+print("Le nombre de CPUs distincts est {}".format(CPUs.distinct().count()))
+M_y_temp = entries.map(lambda x: (x[column_index1],x[column_index2]))
+result = M_y_temp.map(lambda x: (x[1], x[0])).groupByKey().mapValues(list).map(lambda x: list(x))
+
+def apply_mean(list):
+	return list
+
+result = result.map(lambda x: apply_mean(x))
+
+#for r in result.collect():
+	#print(r)
 
 
-for elem in machineIDs.take(10):
-	print(elem)
 
 '''
 
