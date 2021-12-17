@@ -135,26 +135,54 @@ def check(list):
 		return True
 #6
 #DECOMMENT
-CPU_ressource_join2 = sc.parallelize(CPU_ressource_join.collect()).filter(lambda x: check(x[1]))
+#CPU_ressource_join2 = sc.parallelize(CPU_ressource_join.collect()).filter(lambda x: check(x[1]))
 #DECOMMENT
-percentage = (CPU_ressource_join.count() * 100) / CPU_ressource_join.count()
-print("The percentage of tasks that request the more resources and consume the more resources is {}%".format(round(percentage,3)))
-print("\n Yes, the tasks that request the more resources the one that consume the more resources.")
-#print(CPU_ressource_join.take(5))
+#percentage = (CPU_ressource_join2.count() * 100) / CPU_ressource_join.count()
+#print("The percentage of tasks that request the more resources and consume the more resources is {}%".format(round(percentage,3)))
+#print("\n Yes, the tasks that request the more resources the one that consume the more resources.")
+
 #.collect())
 
 print("==============================================")
 
-column_index24=findCol(firstLine2, "event type")
-print("{} corresponds to column {}".format("event type", column_index24))
+datapath4 = "../clusterdata-2011-2/machine_events/data.csv"
+#part-00000-of-00001.csv"
+wholeFile4 = sc.textFile(datapath4)
 
+firstLine4 = [
+"time",
+"machine ID",
+"event type",
+"platform ID",
+"CPUs",
+"Memory"]
+
+
+entries4 = wholeFile4.map(lambda x : x.split(','))
+
+
+column_index41=findCol(firstLine4, "machine ID")
+print("{} corresponds to column {}".format("machine ID", column_index41))
+column_index42=findCol(firstLine4, "event type")
+print("{} corresponds to column {}".format("event type", column_index42))
+column_index43=findCol(firstLine4, "CPUs")
+print("{} corresponds to column {}".format("CPUs", column_index43))
 #DECOMMENT
-#task_event_on_job = entries2.map(lambda x: ((x[column_index21],x[column_index22]),x[column_index24])).filter(lambda x: x[1]=='2')
-
+task_event_on_job = entries4.map(lambda x: (x[column_index41],x[column_index42],x[column_index43])).filter(lambda x: x[0]!='' and x[1]!='' and x[2]!='' )
+task_event_on_job = task_event_on_job.filter(lambda x: float(x[2])>=0.5)
 #print(task_event_on_job.collect())
+percentage = (task_event_on_job.filter(lambda x: x[1]=='2') .count() * 100) / task_event_on_job.count()
+print("The percentage of peaks of high resource consumption on some machines and task eviction events is {}%".format(round(percentage,3)))
+print("\n Yes, twe observe correlations between peaks of high resource consumption on some machines and task eviction events.")
+
+
+#machine_resource_consumption = entries1.map(lambda x: (x[column_index14],x[column_index13])).filter(lambda x: x[0]!='' and x[1]!='')
+#print(machine_resource_consumption.collect())
 
 #DECOMMENT
-#CPU_resource_consumed_and_task_event = CPU_resource_consumed.join(task_event_on_job).collect()
+#CPU_resource_consumed_and_task_event = machine_resource_consumption.join(task_event_on_job)
+#machine_resource_consumption.union(task_event_on_job).reduceByKey(lambda a, b:(a,b))
+#machine_resource_consumption.join(task_event_on_job)
 #print(CPU_resource_consumed.collect())
 #DECOMMENT
 #print(CPU_resource_consumed_and_task_event)
@@ -168,7 +196,7 @@ field is present, and true, it indicates that a task must be
 scheduled to execute on a different machine than any other currently running task in the
 job. It is a special type of constraint.'''
 
-column_index25=findCol(firstLine2, "different machines restriction")
+'''column_index25=findCol(firstLine2, "different machines restriction")
 print("{} corresponds to column {}".format("different machines restriction", column_index25))
 
 machine_constrainst_event = entries2.map(lambda x: ((x[column_index24], x[column_index25]))).distinct()
@@ -188,5 +216,5 @@ firstLine3 = [
 entries3 = wholeFile3.map(lambda x : x.split(','))
 
 # keep the RDD in memory
-entries3.cache()
+entries3.cache()'''
 
