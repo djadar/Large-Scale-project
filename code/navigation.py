@@ -132,11 +132,15 @@ print("{} corresponds to column {}".format("priority", column_index23))
 column_index24=findCol(firstLine2, "event type")
 print("{} corresponds to column {}".format("event type", column_index24))
 
-priority_evicted = entries2.map(lambda x: (x[column_index23],x[column_index24]))
-priority_evicted = priority_evicted.filter(lambda x:x[0]=='0')
-#4
-print(priority_evicted.countByValue())
+priority_event = entries2.map(lambda x: (x[column_index23],x[column_index24]))
 
+priority_evicted = priority_event.filter(lambda x:x[1]=='2')
+
+ #low_priority_event = priority_event.filter(lambda x:x[0]=='0')
+#4
+percentage = (priority_evicted.countByValue()[('0','2')] * 100) / priority_evicted.count()
+print("The percentage of ejected task being of low priority is {}%".format(round(percentage,3)))
+print("\n Yes, tasks with low priority have a higher probability of being evicted.")
 print("==============================================")
 
 column_index25=findCol(firstLine2, "machine ID")
@@ -159,7 +163,8 @@ job_machine = job_machine.map(lambda x: (x[0],clean(x[1])))
 #print(job_machine.map(lambda x: clean(list(x[1])).collect()))
 
 #5
-print(job_machine.collect())
+#DECOMMENT
+#print(job_machine.collect())
 
 
 print("No, so we have a distributed system")

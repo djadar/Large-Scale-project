@@ -3,6 +3,7 @@ import sys
 from pyspark import SparkContext
 import time
 
+from operator import add
 # Finds out the index of "name" in the array firstLine 
 # returns -1 if it cannot find it
 def findCol(firstLine, name):
@@ -25,7 +26,7 @@ datapath1 = "../clusterdata-2011-2/task_usage/data.csv"
 wholeFile1 = sc.textFile(datapath1)
 
 # We set the comumn names in a an array
-firstLine1 = ["time",
+firstLine1 = [
 "start time",
 "end time",
 "job ID",
@@ -59,19 +60,23 @@ column_index11=findCol(firstLine1, "job ID")
 print("{} corresponds to column {}".format("job ID", column_index11))
 column_index12=findCol(firstLine1, "task index")
 print("{} corresponds to column {}".format("task index", column_index12))
-column_index13=findCol(firstLine1, "CPU rate")
-print("{} corresponds to column {}".format("CPU rate", column_index13))
+column_index13=findCol(firstLine1, "maximum CPU rate")
+print("{} corresponds to column {}".format("maximum CPU rate", column_index13))
 
-CPU_resource_consumed = entries1.map(lambda x: ((x[column_index11],x[column_index12]),x[column_index13]))
-#print(CPU_resource_consumed.collect())
-def merge(list):
-	return (list[0][0]+"-"+list[0][1], list[1])
+CPU_resource_consumed = entries1.map(lambda x: ((x[column_index11],x[column_index12]),x[column_index13])).filter(lambda x: x[1]!='')
 
-CPU_resource_consumed = CPU_resource_consumed.map(lambda x : merge(x)).distinct()
-('6183750753-60', '0.125')
+def merge2(list):
+	return (list[0][1]+"-"+list[0][0], list[1])
+
+#CPU_resource_consumed = CPU_resource_consumed.map(lambda x : merge2(x)).distinct()
+#print(CPU_resource_consumed.take(5))
+
 #print(CPU_resource_consumed.collect())
 ##### Create an RDD that contains all machine ID observed in the
 ##### different entries
+
+def merge(list):
+	return (list[0][0]+"-"+list[0][1], list[1])
 
 datapath2 = "../clusterdata-2011-2/task_events/data"
 #part-00000-of-00001.csv"
@@ -103,21 +108,85 @@ print("{} corresponds to column {}".format("task index", column_index22))
 column_index23=findCol(firstLine2, "CPU request")
 print("{} corresponds to column {}".format("CPU request", column_index23))
 
-CPU_resource_requested = entries2.map(lambda x: ((x[column_index21],x[column_index22]),x[column_index23]))
+CPU_resource_requested = entries2.map(lambda x: ((x[column_index21], x[column_index22]),x[column_index23])).filter(lambda x: x[1] !='')
 ##### Create an RDD that contains all machine ID observed in the
 ##### different entries
 
 # Information about the machine ID is provided in the column named
 # "machine ID"
-CPU_resource_requested = CPU_resource_requested.map(lambda x : merge(x)).distinct()
+#DECOMMENT
 
-CPU_ressource_join = CPU_resource_requested.join(CPU_resource_consumed).collect()
+#CPU_resource_requested = CPU_resource_requested.map(lambda x : merge(x)).distinct()
+#print(CPU_resource_requested.take(5))
+#DECOMMENT
+CPU_ressource_join = CPU_resource_requested.join(CPU_resource_consumed)
+#CPU_ressource_join = CPU_resource_requested.union(CPU_resource_consumed).reduceByKey(lambda a, b:(a,b))
 
 
 threshold = 0.05
 def check(list):
-	if float(list[0]) > threshold and float(list[1]) > threshold :
+	#if float(list[0]) > threshold and float(list[1]) > threshold :
+	if list[0] =='' :
+		list = (0,list[1])
+	if list[1] =='' :
+		list = (list[0],0)
+	#if float(list[1]) > (threshold * float(list[0])) :
+	if (float(list[1]) >= threshold ) and (float(list[0]) >= threshold):
 		return True
+#6
+#DECOMMENT
+CPU_ressource_join2 = sc.parallelize(CPU_ressource_join.collect()).filter(lambda x: check(x[1]))
+#DECOMMENT
+percentage = (CPU_ressource_join.count() * 100) / CPU_ressource_join.count()
+print("The percentage of tasks that request the more resources and consume the more resources is {}%".format(round(percentage,3)))
+print("\n Yes, the tasks that request the more resources the one that consume the more resources.")
+#print(CPU_ressource_join.take(5))
+#.collect())
 
-CPU_ressource_join = sc.parallelize(CPU_ressource_join).filter(lambda x: check(x[1]))
-print(CPU_ressource_join.collect())
+print("==============================================")
+
+column_index24=findCol(firstLine2, "event type")
+print("{} corresponds to column {}".format("event type", column_index24))
+
+#DECOMMENT
+#task_event_on_job = entries2.map(lambda x: ((x[column_index21],x[column_index22]),x[column_index24])).filter(lambda x: x[1]=='2')
+
+#print(task_event_on_job.collect())
+
+#DECOMMENT
+#CPU_resource_consumed_and_task_event = CPU_resource_consumed.join(task_event_on_job).collect()
+#print(CPU_resource_consumed.collect())
+#DECOMMENT
+#print(CPU_resource_consumed_and_task_event)
+
+
+print("==============================================")
+'''
+If the ​
+different-machine constraint ​
+field is present, and true, it indicates that a task must be
+scheduled to execute on a different machine than any other currently running task in the
+job. It is a special type of constraint.'''
+
+column_index25=findCol(firstLine2, "different machines restriction")
+print("{} corresponds to column {}".format("different machines restriction", column_index25))
+
+machine_constrainst_event = entries2.map(lambda x: ((x[column_index24], x[column_index25]))).distinct()
+#print(machine_constrainst_event.collect())
+datapath3 = "../clusterdata-2011-2/task_events/data"
+#part-00000-of-00001.csv"
+wholeFile3 = sc.textFile(datapath2)
+
+firstLine3 = [
+"time",
+"job ID",
+"task index",
+"comparison operator",
+"attribute name",
+"attribute value"]
+
+entries3 = wholeFile3.map(lambda x : x.split(','))
+
+# keep the RDD in memory
+entries3.cache()
+
