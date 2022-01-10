@@ -24,7 +24,7 @@ gsutil cp gs://clusterdata-2011-2/task_constraints/part-00000-of-00500.csv.gz ./
 #gsutil ls gs://clusterdata-2011-2/task_usage
 gsutil cp gs://clusterdata-2011-2/task_usage/part-00000-of-00500.csv.gz ./task_usage/
 
-#gcloud dataproc jobs submit pyspark word_count.py \
+#gcloud dataproc jobs submit pyspark gcp.py \
     --cluster=cluster-8c02 \
     --region=europe-west2 \
     -- gs://bucket-large-scale-project/input/ gs://bucket-large-scale-project/output/
