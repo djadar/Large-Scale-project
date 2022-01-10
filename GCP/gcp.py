@@ -22,7 +22,7 @@ sc.setLogLevel("ERROR")
 # read the input file into an RDD[String]
 #datapath = "../clusterdata-2011-2/machine_events/data"
 #part-00000-of-00001.csv"
-datapath = "gs://clusterdata-2011-2/machine_events"
+datapath = "gs://bucket-large-scale-project/clusterdata-2011-2/machine_events"
 wholeFile = sc.textFile(datapath)
 
 # We set the comumn names in a an array
