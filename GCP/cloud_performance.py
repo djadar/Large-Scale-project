@@ -98,7 +98,7 @@ print("processing time is: ", timedelta(seconds=end - start))
 
 
 
-datapath2 = "gs://bucket-large-scale-project/clusterdata-2011-2/tasks_events"
+datapath2 = "gs://bucket-large-scale-project/clusterdata-2011-2/task_events"
 #part-00000-of-00001.csv"
 wholeFile2 = sc.textFile(datapath2,3)
 # wholeFile2 = wholeFile2.repartition(10).glom().collect()

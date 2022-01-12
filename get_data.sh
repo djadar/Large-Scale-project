@@ -30,7 +30,7 @@ gsutil cp gs://clusterdata-2011-2/task_usage/part-00000-of-00500.csv.gz ./task_u
     -- gs://bucket-large-scale-project/input/ gs://bucket-large-scale-project/output/
 
 
-gcloud dataproc jobs submit pyspark cloud_performance.py     --cluster=cluster-8c02 --region=europe-west2
+gcloud dataproc jobs submit pyspark cloud_performance.py --cluster=cluster-8c02 --region=europe-west2
 
 PROJECT=eastern-crawler-337619
 
