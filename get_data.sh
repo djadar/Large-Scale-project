@@ -29,4 +29,22 @@ gsutil cp gs://clusterdata-2011-2/task_usage/part-00000-of-00500.csv.gz ./task_u
     --region=europe-west2 \
     -- gs://bucket-large-scale-project/input/ gs://bucket-large-scale-project/output/
 
+
+gcloud dataproc jobs submit pyspark cloud_performance.py     --cluster=cluster-8c02 --region=europe-west2
+
+PROJECT=eastern-crawler-337619
+
+BUCKET_NAME=bucket-large-scale-project
+
+CLUSTER=cluster-8c02
+
+REGION=europe-west2
+
+gcloud dataproc clusters create ${CLUSTER} \
+    --project=${PROJECT} \
+    --region=${REGION} \
+    --single-node
+
+gsutil cp -r gs://clusterdata-2011-2 gs://${BUCKET_NAME}/clusterdata-2011-2
+
 https://console.cloud.google.com/storage/browser/bucket-large-scale-project;tab=objects?project=eastern-crawler-337619&prefix=&forceOnObjectsSortingFiltering=false

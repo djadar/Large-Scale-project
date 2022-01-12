@@ -15,7 +15,7 @@ def findCol(firstLine, name):
 #### Driver program
 
 # start spark with 1 worker thread
-sc = SparkContext("local[1]")
+sc = SparkContext("local[*]")
 sc.setLogLevel("ERROR")
 
 

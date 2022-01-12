@@ -25,7 +25,7 @@ def apply_mean(list):
 #### Driver program
 totalStart = timer()
 conf = (SparkConf()
-		.setMaster("local[1]")
+		.setMaster("local[*]")
         .set("spark.driver.cores","6")
 		
 )
